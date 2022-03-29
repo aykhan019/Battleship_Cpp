@@ -7,7 +7,6 @@ void Run()
 	Start();
 }
 
-
 int main()
 {
 	Run();

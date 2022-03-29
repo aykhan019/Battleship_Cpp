@@ -60,14 +60,13 @@ void ShowChoices()
             if (counter == 1)
             {
                 // Loading
-                ShowLoadingScreen();
-                Sleep(50); 
+                //ShowLoadingScreen();
+                //Sleep(50); 
                 // GAME
                 //system("cls");
                 StartGame();
                 //system("cls");
 
-                //ShowMenu();
             }
             if (counter == 2)
             {

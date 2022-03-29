@@ -9,8 +9,6 @@
 #include "Color.h"
 using namespace std;
 
-// Dont forget to skip
-
 void PrintLoadingBarFrame()
 {
     TextColor(RED);
@@ -130,7 +128,6 @@ void StartLoading(int loaded_percentage, int max_percentage)
         {
             wprintf(L"      ");
         }
-
         // Delay
         Sleep(50);
 
