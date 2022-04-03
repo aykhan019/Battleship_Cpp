@@ -10,7 +10,40 @@
 #include "StartGame.h"
 using namespace std;
 
+void ShowHowToPlay()
+{
+    TextColor(BLUE);
+    wprintf(L"\n \x2588 Start / Preparation");
+    TextColor(GREEN);
+    wprintf(L"\n Each game can vary in the number of ships employed but a common practice is to have 5 ships of differing size (2 to 5)  squares. A destroyer is 4 squares long, a submarine is three squares long, a battleship is two squares longand carrier  is 1 square long.You place your ships on a grid of ten columns by ten rows. These represent the location of the ships   on a battlefield. Computer will also be in possession of a second grid of the same size.");
+    TextColor(BLUE);
+    wprintf(L"\n\n \x2588 In Play");
+    TextColor(GREEN);
+    wprintf(L"\n You will pick a square at random, writing it by its reference of column reference, row number (C3 for example). This    represents your firing a missile directly at that square. If the computer has any part of one of its ships positioned   on this square, it will be seem like \"X\". In this instance you will now be allowed to make another guess. This          continues until the attacking player misses. If you miss, this square will be seem like \"M\".");
+    TextColor(BLUE);
+    wprintf(L"\n\n \x2588 Victory");
+    TextColor(GREEN);
+    wprintf(L"\n The side who successfully destroys opponent’s all ships by hitting each square the other side occupy is the winner.");
+    TextColor(BLUE);
+    wprintf(L"\n\n \x2588 Game Symbols\n");
+    TextColor(RED);
+    wprintf(L"\n  X - Destroyed Ship\n");
+    TextColor(PURPLE);
+    wprintf(L"  M - Missed Shot\n");
+    TextColor(CYAN);
+    wprintf(L"  M - Last Missed Shot\n");
+    TextColor(GREEN);
+    wprintf(L" \x2590");
+    wprintf(L"\x2588");
+    wprintf(L"\x258C");
+    wprintf(L" - Warship\n");
+
+    wprintf(L"\n\n ");
+    system("pause");
+}
+
 void ShowMenu();
+
 void ShowChoices()
 {
     TextColor(BLACK, WHITE);
@@ -60,8 +93,8 @@ void ShowChoices()
             if (counter == 1)
             {
                 // Loading
-                //ShowLoadingScreen();
-                //Sleep(50); 
+                ShowLoadingScreen();
+                Sleep(50); 
                 // GAME
                 //system("cls");
                 StartGame();
@@ -70,7 +103,9 @@ void ShowChoices()
             }
             if (counter == 2)
             {
+                system("cls");
                 // HOW TO PLAY
+                ShowHowToPlay();
             }
             if (counter == 3)
             {

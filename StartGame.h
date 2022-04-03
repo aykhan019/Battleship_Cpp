@@ -22,12 +22,19 @@ int random_Y_arr[number_of_random_Y] = { 1,3,5,7,9,11,13,15,17,19 };
 int size_s = 0;
 Coordinates** coordinates_shot_before_by_computer = new Coordinates * [size_s] {};
 
-enum board_codes { WALL = 8, SPACE = 0, GREEN_SHIP = 1, MISSED_SHOT = 66, SHIPSIDE = 11, RED_SHIP = 2,
+int size_f = 0;
+Coordinates** coordinates_of_first_successful_shot = new Coordinates * [size_f] {};
+
+enum board_codes { WALL = 8, SPACE = 0, GREEN_SHIP = 1, MISSED_SHOT = 66, LAST_MISSED_SHOT = 67, SHIPSIDE = 11, 
 	               COMPUTER_SHIP = 3, BOUNDARY_AREA = 7, HIT = 104, DESTROYED_SHIP = 13 };
 
 enum Directions { UP = 72, DOWN = 80, RIGHT = 77, LEFT = 75, ROTATE = 114 }; 
 
 int ship_color[1] = { GREEN };
+
+int players_ship_left = 10;
+
+int computers_ship_left = 10;
 
 void PrintNumbers(int x, int y)
 {
@@ -83,7 +90,6 @@ void PrintLetters(int x, int y)
 
 void FillBoardWithNumbers(int arr[width][length])
 {
-	CursorCoordinates(11, 4);
 	for (int y = 0; y < width; y++)
 	{
 		for (int x = 0; x < length; x++)
@@ -103,6 +109,8 @@ void FillBoardWithNumbers(int arr[width][length])
 
 bool IsBoundaryArea(const int y, const int x, int arr[width][length]);
 
+bool game_started = false;
+
 void DrawPlayerBoard()
 {
 	system("cls");
@@ -110,6 +118,11 @@ void DrawPlayerBoard()
 	CursorCoordinates(17, 1);
 	TextColor(RED);
 	wprintf(L"Player Board");
+	CursorCoordinates(16, 2);
+	if (game_started)
+	{
+		wprintf(L"Ships Left : %d", players_ship_left);
+	}
 	PrintLetters(2,4);
 	CursorCoordinates(5, 4);
 	TextColor(BLACK);
@@ -213,12 +226,6 @@ void DrawPlayerBoard()
 				}
 				TextColor(BLACK);
 			}
-			else if (player_board[y][x] == RED_SHIP)
-			{
-				TextColor(RED);
-				wprintf(L"\x2592");
-				TextColor(BLACK);
-			}
 			else if (player_board[y][x] == BOUNDARY_AREA)
 			{
 				wprintf(L" ");
@@ -235,6 +242,12 @@ void DrawPlayerBoard()
 				wprintf(L"M");
 				TextColor(BLACK);
 			}
+			else if (player_board[y][x] == LAST_MISSED_SHOT)
+			{
+			TextColor(CYAN);
+			wprintf(L"M");
+			TextColor(BLACK);
+			}
 		}
 	}
 	PrintNumbers(2,4);
@@ -245,6 +258,8 @@ void DrawComputerBoard()
 	CursorCoordinates(91, 1);
 	TextColor(RED);
 	wprintf(L"Computer Board");
+	CursorCoordinates(91, 2);
+	wprintf(L"Ships Left : %d", computers_ship_left);
 	PrintLetters(77,4);
 	CursorCoordinates(13, 4);
 	TextColor(BLACK);
@@ -329,7 +344,7 @@ void DrawComputerBoard()
 			}
 			else if (computer_board[y][x] == GREEN_SHIP)
 			{
-				wprintf(L"S");
+				wprintf(L" ");
 			}
 			else if (computer_board[y][x] == SHIPSIDE)
 			{
@@ -348,6 +363,12 @@ void DrawComputerBoard()
 			else if (computer_board[y][x] == MISSED_SHOT)
 			{
 				TextColor(PURPLE);
+				wprintf(L"M");
+				TextColor(BLACK);
+			}
+			else if (computer_board[y][x] == LAST_MISSED_SHOT)
+			{
+				TextColor(CYAN);
 				wprintf(L"M");
 				TextColor(BLACK);
 			}
@@ -374,6 +395,15 @@ inline bool IsSpace(const int y, const int x, int arr[width][length])
 inline bool IsShip(const int y, const int x, int arr[width][length])
 {
 	if (arr[y][x] == GREEN_SHIP || arr[y][x] == DESTROYED_SHIP)
+	{
+		return true;
+	}
+	return false;
+}
+
+inline bool IsDestroyedShip(const int y, const int x, int arr[width][length])
+{
+	if (arr[y][x] == DESTROYED_SHIP)
 	{
 		return true;
 	}
@@ -417,11 +447,6 @@ inline void TurnIntoBlueShip(int y, int x, int arr[width][length])
 	arr[y][x] = GREEN_SHIP;
 	arr[y][x - 1] = SHIPSIDE;
 	arr[y][x + 1] = SHIPSIDE;
-}
-
-inline void TurnIntoRedShip(int y, int x, int arr[width][length])
-{
-	arr[y][x] = RED_SHIP;
 }
 
 bool ShipIsVertical(int y, int x, const int ship_length, int arr[width][length])
@@ -490,15 +515,7 @@ void PlaceShipHorizontally(int y, int x, const int ship_length, int fg, int arr[
 		{
 			TurnIntoBlueShip(y, x + (4 * b), arr);
 		}
-	}
-	else if (fg == RED)
-	{
-		for (int c = 0; c < ship_length; c++)
-		{
-			TurnIntoRedShip(y, x + (4 * c), arr);
-		}
-	}			
-	
+	}		
 }
 
 bool CanVerticallyGoUp(int y, int x, int arr[width][length])
@@ -802,11 +819,31 @@ void PlaceAShip(const int ship_length, int arr[width][length])
 {
 	int Y = 0;
 	int X = 0;
+	int a = number_of_random_X;
+	int b = number_of_random_Y;
+	int index_for_Y = 0 + rand() % (a - 3);
+	int index_for_X = 0 + rand() % (b - 3);
 	bool ship_is_horizontal = false;
+	if (ship_length == 4)
+	{
+		a -= 3;
+		b -= 3;
+	}
+	else if (ship_length == 3)
+	{
+		a -= 2;
+		b -= 2;
+	}
+	else if (ship_length == 2)
+	{
+		a -= 1;
+		b -= 1;
+	}
 	while (true)
 	{
-		int index_for_Y = 0 + rand() % (number_of_random_Y);
-		int index_for_X = 0 + rand() % (number_of_random_X);
+
+		index_for_Y = 0 + rand() % (a);
+		index_for_X = 0 + rand() % (b);
 
 		Y = random_Y_arr[index_for_Y];
 		X = random_X_arr[index_for_X];
@@ -1385,6 +1422,43 @@ bool CanCreateRandomVerticalShip(int y, int x, int ship_length, int arr[width][l
 	}
 }
 
+bool DoesntHaveDestroyedShipAround(int y, int x, int arr[width][length])
+{
+	if (IsDestroyedShip(y + 2, x + 4, arr))
+	{
+		return false;
+	}
+	if (IsDestroyedShip(y + 2, x - 4, arr))
+	{
+		return false;
+	}
+	if (IsDestroyedShip(y - 2, x + 4, arr))
+	{
+		return false;
+	}
+	if (IsDestroyedShip(y - 2, x - 4, arr))
+	{
+		return false;
+	}
+	if (IsDestroyedShip(y, x + 4, arr))
+	{
+		return false;
+	}
+	if (IsDestroyedShip(y, x - 4, arr))
+	{
+		return false;
+	}
+	if (IsDestroyedShip(y + 2, x, arr))
+	{
+		return false;
+	}
+	if (IsDestroyedShip(y - 2, x, arr))
+	{
+		return false;
+	}
+	return true;
+}
+
 void GetRandomShip(const int ship_length, int arr[width][length])
 {
 	srand(time(0));
@@ -1434,51 +1508,41 @@ void PlaceShipsRandomly(int arr[width][length])
 	GetRandomShip(1, arr);
 	GetRandomShip(1, arr);
 	GetRandomShip(1, arr);
-	FillBoundaryAreas(arr);
 	DrawPlayerBoard();
 }
 
 bool players_turn = true;
+
+void DoLastMissedShot_MissedShot(int arr[width][length])
+{
+	for (int y = 0; y < width; y++)
+	{
+		for (int x = 0; x < length; x++)
+		{
+			if (arr[y][x] == LAST_MISSED_SHOT)
+			{
+				arr[y][x] = MISSED_SHOT;
+			}
+		}
+	}
+}
 
 bool HitTheCoordinates(int y, int x, int arr[width][length])
 {
 	if (arr[y][x] == GREEN_SHIP)
 	{
 		arr[y][x] = DESTROYED_SHIP;
-		if (!players_turn)
-		{
-			player_board[y][x + 1] = SPACE;
-			player_board[y][x - 1] = SPACE;
-		}
+		arr[y][x + 1] = SPACE;
+		arr[y][x - 1] = SPACE;		
 		return true;
 	}
 	else
 	{
-		arr[y][x] = MISSED_SHOT;
+		DoLastMissedShot_MissedShot(arr);
+		arr[y][x] = LAST_MISSED_SHOT;
 		return false;
 	}
-
 }
-
-char EnterX()
-{
-	CursorCoordinates(49, 8);
-	wprintf(L"Enter X (Letter) : ");
-	char X = 0;
-	cin >> X;
-	return X;
-}
-
-int EnterY()
-{
-	CursorCoordinates(49, 9);
-	wprintf(L"Enter Y (Number) : ");
-	int Y = 0;
-	cin >> Y;
-	return Y;
-}
-
-bool game_is_not_finished = true;
 
 bool ShotBeforeByComputer(int y, int x)
 {
@@ -1505,6 +1569,21 @@ void AddNewCoordinatesShotBeforeByComputerArray(int y, int x)
 	new_xy = nullptr;
 	new_coordinates = nullptr;
 	size_s++;
+}
+
+void AddNewCoordinatesOfFirstSuccessfulShot(int y, int x)
+{
+	Coordinates* new_xy = new Coordinates[]{ y,x };
+	Coordinates** new_coordinates = new Coordinates * [size_f + 1]{};
+	for (int a = 0; a < size_f; a++)
+	{
+		new_coordinates[a] = coordinates_of_first_successful_shot[a];
+	}
+	new_coordinates[size_f] = new_xy;
+	coordinates_of_first_successful_shot = new_coordinates;
+	new_xy = nullptr;
+	new_coordinates = nullptr;
+	size_f++;
 }
 
 int GetBaseCoordinateX(int y, int x, int arr[width][length])
@@ -1542,7 +1621,7 @@ int GetBaseCoordinateY(int y, int x, int arr[width][length])
 	{
  		return y;
 	}
-	if (IsShip(y + 2, x, arr) || IsShip(y - 2, x, arr)) // Ship Is Vetical
+	if (IsShip(y + 2, x, arr) || IsShip(y - 2, x, arr)) // Ship Is Vertical
 		{
 		if (!IsShip(y - 2, x, arr))
 		{
@@ -1622,7 +1701,7 @@ bool ShipDestroyedCompletely(int y, int x, int arr[width][length])
 	{
 		int Y = GetBaseCoordinateY(y, x, arr);
 		int X = GetBaseCoordinateX(y, x, arr);
-		if (ShipIsHorizontal(y, x, ship_length, arr))
+		if (ShipIsHorizontal(Y, X, ship_length, arr))
 		{
 			for (int e = 0; e < ship_length; e++)
 			{
@@ -1648,228 +1727,313 @@ bool ShipDestroyedCompletely(int y, int x, int arr[width][length])
 	}
 }
 
-int index = 0;
-
 bool hit_was_successful = false;
 
-bool tried_left_until_missed_shot = false;
-bool was_trying_left = false;
-
 bool tried_right_until_missed_shot = false;
-bool was_trying_right = false;
+
+bool has_tried_right = false;
+
+bool tried_left_until_missed_shot = false;
+
+bool has_tried_left = false;
 
 bool tried_up_until_missed_shot = false;
-bool was_trying_up = false;
+
+bool has_tried_up = false;
 
 bool tried_down_until_missed_shot = false;
-bool was_trying_down = false;
+
+bool has_tried_down = false;
 
 bool has_found_a_ship = false;
-
-int tried_left_times = 0;
-
-bool breakk = false;
-
-int Y = 0;
-int X = 0;
 
 void ComputerHits()
 {
 	srand(time(0));
 
-	int index_for_X = 0;
-	int index_for_Y = 0;
+	int Y = 0;
+	int X = 0;
+	int index_Y = 0;
+	int index_X = 0;
+	int base_shot_Y = 0;
+	int base_shot_X = 0;
+	int counter = 1;
+	int counter2 = 1;
 
 	while (true)
 	{
-		Sleep(700);
-		DrawGameScreen();
-		Sleep(700);
+		Sleep(1000);
 		if (has_found_a_ship)
 		{
-			// Try right, if there is a ship in the right (it means ship is horizontal) 
-			// continue shooting in this direction until it is missed shot. If it is misses shot and 
-			// ship is not destroyed, from the starting point try left until ship is destroyed
+			base_shot_Y = coordinates_of_first_successful_shot[size_f - 1]->y;
+			base_shot_X = coordinates_of_first_successful_shot[size_f - 1]->x;
 
-			if (!ShipDestroyedCompletely(Y, X, player_board))
+			Y = coordinates_shot_before_by_computer[size_s - 1]->y;
+			X = coordinates_shot_before_by_computer[size_s - 1]->x;
+
+			// Trying right
+			if (tried_right_until_missed_shot == false)
 			{
-				if (tried_right_until_missed_shot == false)
+				has_tried_right = true;
+				if (ShotBeforeByComputer(Y, X + 4) == false && ShipDestroyedCompletely(Y, X, player_board) == false && X + 4 < 39)
 				{
 					X += 4;
-					was_trying_right = true;
-				}
-				if (tried_right_until_missed_shot == true && tried_left_until_missed_shot == false)
-				{
-					X -= 4;
-					was_trying_left = true;
-				}
-				if (tried_right_until_missed_shot == true && tried_left_until_missed_shot == true && tried_up_until_missed_shot == false)
-				{
-					Y -= 2;
-					was_trying_up = true;
-				}
-				if (tried_right_until_missed_shot == true && tried_left_until_missed_shot == true && tried_up_until_missed_shot == true && tried_down_until_missed_shot == false)
-				{
-					Y += 2;
-					was_trying_down = true;
-				}
-
-
-
-
-
-				if (!ShipDestroyedCompletely(Y, X, player_board))
-				{
-					if (!ShotBeforeByComputer(Y, X))
-					{
-						hit_was_successful = HitTheCoordinates(Y, X, player_board);
-						AddNewCoordinatesShotBeforeByComputerArray(Y, X);
-					}
-					if (was_trying_right && !hit_was_successful)
+					Sleep(500);
+					hit_was_successful = HitTheCoordinates(Y, X, player_board);
+					DrawGameScreen();
+					Sleep(500);
+					AddNewCoordinatesShotBeforeByComputerArray(Y, X);
+					if (hit_was_successful == false)
 					{
 						tried_right_until_missed_shot = true;
-						was_trying_right = false;
+						hit_was_successful = false;
+						players_turn = true;
+						break;
 					}
-					if (was_trying_left && !hit_was_successful)
+					DoLastMissedShot_MissedShot(player_board);
+				}
+				else
+				{
+					tried_right_until_missed_shot = true;
+				}
+			}
+			else if (tried_left_until_missed_shot == false)
+			{
+				has_tried_left = true;
+				if (ShotBeforeByComputer(base_shot_Y, base_shot_X - 4) == false && ShipDestroyedCompletely(base_shot_Y, base_shot_X, player_board) == false && X - 4 > 0)
+				{
+					X = base_shot_X - 4;
+					Sleep(500);
+					hit_was_successful = HitTheCoordinates(Y, X, player_board);
+					DrawGameScreen();
+					Sleep(500);
+					AddNewCoordinatesShotBeforeByComputerArray(Y, X);
+					if (hit_was_successful == true)
+					{
+						coordinates_of_first_successful_shot[size_f - 1]->x -= 4;
+						DoLastMissedShot_MissedShot(player_board);
+					}
+					else
 					{
 						tried_left_until_missed_shot = true;
-						was_trying_left = false;
-					}
-					if (was_trying_up && !hit_was_successful)
-					{
-						tried_up_until_missed_shot = true;
-						was_trying_up = false;
-					}
-					if (was_trying_down && !hit_was_successful)
-					{
-						tried_down_until_missed_shot = true;
-						was_trying_down = false;
+						hit_was_successful = false;
+						players_turn = true;
+						break;
 					}
 				}
-
-				if (ShipDestroyedCompletely(Y, X, player_board))
+				else
 				{
-					hit_was_successful = false;
-
-					tried_left_until_missed_shot = false;
-					was_trying_left = false;
-
-					tried_right_until_missed_shot = false;
-					was_trying_right = false;
-
-					tried_up_until_missed_shot = false;
-					was_trying_up = false;
-
-					tried_down_until_missed_shot = false;
-					was_trying_down = false;
-
-					has_found_a_ship = false;
+					tried_left_until_missed_shot = true;
 				}
+			}
+			else if (tried_up_until_missed_shot == false)
+			{
+				has_tried_up = true;
+				if (ShotBeforeByComputer(base_shot_Y - (counter * 2), base_shot_X) == false && ShipDestroyedCompletely(base_shot_Y, base_shot_X, player_board) == false && Y - 2 > 0)
+				{
+					Y = base_shot_Y - (counter * 2);
+					counter++;
+					Sleep(500);
+					hit_was_successful = HitTheCoordinates(Y, base_shot_X, player_board);
+					DrawGameScreen();
+					Sleep(500);
+					AddNewCoordinatesShotBeforeByComputerArray(Y, base_shot_X);
+					if (hit_was_successful == false)
+					{
+						//coordinates_of_first_successful_shot[size_f - 1]->x -= 2;
+						tried_up_until_missed_shot = true;
+						hit_was_successful = false;
+						players_turn = true;
+						break;
+					}
+					DoLastMissedShot_MissedShot(player_board);
+				}
+				else
+				{
+					tried_up_until_missed_shot = true;
+				}
+			}
+			else if (tried_down_until_missed_shot == false)
+			{
+				has_tried_down = true;
+				if (ShotBeforeByComputer(base_shot_Y + (counter2 * 2), base_shot_X) == false && ShipDestroyedCompletely(base_shot_Y, base_shot_X, player_board) == false && Y + 2 < width)
+				{
+					Y = base_shot_Y + (counter2 * 2);
+					counter2++;
+					Sleep(500);
+					hit_was_successful = HitTheCoordinates(Y, base_shot_X, player_board);
+					DrawGameScreen();
+					Sleep(500);
+					AddNewCoordinatesShotBeforeByComputerArray(Y, base_shot_X);
+					if (hit_was_successful == false)
+					{
+						//coordinates_of_first_successful_shot[size_f - 1]->y += 2;
+						tried_down_until_missed_shot = true;
+						hit_was_successful = false;
+						players_turn = true;
+						break;
+					}
+					DoLastMissedShot_MissedShot(player_board);
+				}
+				else
+				{
+					tried_down_until_missed_shot = true;
+				}
+			}
+
+
+			if (ShipDestroyedCompletely(coordinates_of_first_successful_shot[size_f - 1]->y, coordinates_of_first_successful_shot[size_f - 1]->x, player_board))
+			{
+				players_ship_left--;
+				tried_right_until_missed_shot = false;
+				has_tried_right = false;
+
+				tried_left_until_missed_shot = false;
+				has_tried_left = false;
+
+				tried_up_until_missed_shot = false;
+				has_tried_up = false;
+
+				tried_down_until_missed_shot = false;
+				has_tried_down = false;
+
+				counter = 1;
+				counter2 = 1;
+
+				has_found_a_ship = false;
 			}
 		}
 		else
 		{
-			if (!hit_was_successful)
+			// Take random coordinate
+			while (true)
 			{
-				index_for_Y = 0 + rand() % (number_of_random_Y);
-				index_for_X = 0 + rand() % (number_of_random_X);
+				index_Y = 0 + rand() % (number_of_random_Y);
+				index_X = 0 + rand() % (number_of_random_X);
 
-				Y = random_Y_arr[index_for_Y];
-				X = random_X_arr[index_for_X];
+				Y = random_Y_arr[index_Y];
+				X = random_X_arr[index_X];
 
+				if (ShotBeforeByComputer(Y, X) == false && DoesntHaveDestroyedShipAround(Y,X,player_board) == true)
+					break;
 			}
 
+			// If this coordinate was not shot before, shot it and add to array
 			if (!ShotBeforeByComputer(Y, X))
 			{
+				Sleep(500);
 				hit_was_successful = HitTheCoordinates(Y, X, player_board);
+				DrawGameScreen();
+				Sleep(500);
 				AddNewCoordinatesShotBeforeByComputerArray(Y, X);
 			}
 
-			if (ShipDestroyedCompletely(Y, X, player_board))
+			// Check Shot
+			if (hit_was_successful == true && ShipDestroyedCompletely(Y, X, player_board) == false)
 			{
-				has_found_a_ship = false;
-				breakk = false;
-			}
-
-
-			else if (hit_was_successful == true && has_found_a_ship == false && ShipDestroyedCompletely(Y, X, player_board) == false)
-			{
+				DoLastMissedShot_MissedShot(player_board);
 				has_found_a_ship = true;
-				index = size_s - 1;
+				AddNewCoordinatesOfFirstSuccessfulShot(Y, X);
 			}
-		}
-
-		if (!hit_was_successful && breakk)
-		{
-
-			hit_was_successful = false;
-			if (ShipDestroyedCompletely(Y, X, player_board))
+			else if (hit_was_successful == true && ShipDestroyedCompletely(Y, X, player_board) == true)
 			{
-				has_found_a_ship = false;
+				players_ship_left--;
 			}
-			//players_turn = true;
-			break;
+
+			else if (hit_was_successful == false)
+			{
+				players_turn = true;
+				break;
+			}
 		}
 	}
 }
 
 void StartWar()
 {
-	int y = 0;
-	int x = 0;
-	while (game_is_not_finished)
+	bool successfull = false;
+	DrawGameScreen();
+	game_started = true;
+	while (game_started)
 	{
-		players_turn = false;
+		int y = 0;
+		char x = ' ';
+		if (players_ship_left == 0 || computers_ship_left == 0)
+		{
+			system("cls");
+			break;
+		}
 		if (players_turn)
 		{
 			CursorCoordinates(56, 1);
 			wprintf(L"YOUR TURN");
+			CursorCoordinates(48, 6);
+			wprintf(L"| - Enter coordinates - |  ");
+			CursorCoordinates(49, 8);
+			wprintf(L"Enter X (Letter) : ");
+			ShowCursor();
+			x = ' ';
+			TextColor(GREEN);
+			cin >> x;
+			if (x < 75 && x > 64)
+			{
+				x -= 64;
+			}
+			else if (x < 107 && x > 96) // for lower case letters
+			{
+				x -= 96;
+			}
+			x *= 4;
+			x -= 2;
+			CursorCoordinates(49, 9);
+			TextColor(BLACK);
+			wprintf(L"Enter Y (Number) : ");
+			TextColor(GREEN);
+			y = 0;
+			cin >> y;
+			HideCursor();
+			TextColor(BLACK);
+			y = (y * 2) - 1;
+
+			if (x < 0 || x > 41 || y < 0 || y > 21)
+			{
+				CursorCoordinates(48, 6);
+				wprintf(L"| -  Incorrect Input!  - |");
+				Sleep(1000);
+			}
+			else
+			{
+				successfull = HitTheCoordinates(y, x, computer_board);
+				if (!successfull)
+				{
+					DrawGameScreen();
+					CursorCoordinates(44, 6);
+					wprintf(L"            - MISSED -         ");
+					Sleep(500);
+					players_turn = false;
+				}
+				else
+				{
+					if (ShipDestroyedCompletely(y, x, computer_board))
+					{
+						computers_ship_left--;
+						DrawGameScreen();
+						CursorCoordinates(48, 6);
+						wprintf(L"You Destroyed A Warship");
+						Sleep(2000);
+					}
+					else
+					{
+						DrawGameScreen();
+					}
+					players_turn = true;
+				}
+			}
 		}
 		else
 		{
 			CursorCoordinates(52, 1);
 			wprintf(L"WAITING FOR COMPUTER");
-		}
-		if (players_turn)
-		{
-		//	DrawGameScreen();
-		//	CursorCoordinates(48, 6);
-		//	wprintf(L"| - Enter coordinates - |");
-		//	x = EnterX();
-		//	x -= 64;
-		//	x *= 4;
-		//	x -= 2;
-		//	y = EnterY();
-		//	y = (y * 2) - 1;
-
-		//	if (x < 0 || x > 41 || y < 0 || y > 21)
-		//	{
-		//		CursorCoordinates(48, 6);
-		//		wprintf(L"| -  Incorrect Input!  - |");
-		//		Sleep(1000);
-		//	}
-		//	else
-		//	{
-		//		bool successfull = HitTheCoordinates(y, x, computer_board);
-		//		if (!successfull)
-		//		{
-		//			players_turn = false;
-		//		}
-		//		else
-		//		{
-		//			if (ShipDestroyedCompletely(y, x, computer_board))
-		//			{
-		//				CursorCoordinates(44, 6);
-		//				wprintf(L" - You Destroyed A Complete Ship -");
-		//				Sleep(2000);
-		//			}
-		//			players_turn = true;
-		//		}
-		//	}
-		}
-
-		else
-		{
 			ComputerHits();
 		}
  	}
@@ -1882,6 +2046,16 @@ void StartGame()
 	ChooseAutoOrManuallyShipFilling(player_board);
 	PlaceShipsRandomly(computer_board);
 	StartWar();
-
-	system("pause");
+	CursorCoordinates(51, 12);
+	TextColor(RED);
+	if (players_ship_left == 0)
+	{
+		wprintf(L"Computer Won!");
+	}
+	else
+	{
+		wprintf(L"   You Won!");
+	}
+	TextColor(BLACK);
+	Sleep(10000);
 }

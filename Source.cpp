@@ -7,8 +7,7 @@ void Run()
 	Start();
 }
 
-int main()
-{
+int main(){
 	Run();
 	return 0;
 }
