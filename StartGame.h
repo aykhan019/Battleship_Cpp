@@ -878,6 +878,11 @@ void PlaceAShip(const int ship_length, int arr[width][length])
 	while (true)
 	{
 		DrawPlayerBoard();
+		CursorCoordinates(62, 17);
+		TextColor(RED);
+		wprintf(L"   Use \"R\" to rotate the ships ");
+
+		TextColor(BLACK);
 		CursorCoordinates(34, 10);
 		wprintf(LR"(				 	      _/___
 									_____/______|
@@ -1158,8 +1163,12 @@ void ChooseShipsToBePlaced(int arr[width][length])
 			first_entry = false;
 		}
 
-		CursorCoordinates(62, 12);
+
+		CursorCoordinates(62, 8);
 		TextColor(RED);
+		wprintf(L"   Use \"R\" to rotate the ships ");
+
+		CursorCoordinates(62, 12);
 		wprintf(L" |  WARSHIP  | SIZE |  REMAINING | ");
 
 		CursorCoordinates(62, 13);
