@@ -40,7 +40,7 @@ The following types of ships are available in the game:
     ./battleship
     ```
 ## Video Demo
-[![Battleship Game Demo](https://media.aykhan.net/thumbnails/projects/battleship.jpg)](https://www.youtube.com/watch?v=mobOv9Qd304)
+[![Battleship Game Demo](https://media.aykhan.net/thumbnails/projects/battleship.jpg)](https://www.youtube.com/watch?v=6SWf5NTOs7I)
 
 ## Controls
 - Enter coordinates in the format (e.g., A5) to make your guesses.
