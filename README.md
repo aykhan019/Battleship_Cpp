@@ -39,11 +39,11 @@ The following types of ships are available in the game:
     ```bash
     ./battleship
     ```
-## Video Demo
-[![Battleship Game Demo](https://media.aykhan.net/thumbnails/projects/battleship.jpg)](https://www.youtube.com/watch?v=6SWf5NTOs7I)
-
 ## Controls
 - Enter coordinates in the format (e.g., A5) to make your guesses.
+
+## Video Demo
+[![Battleship Game Demo](https://media.aykhan.net/thumbnails/projects/battleship.jpg)](https://www.youtube.com/watch?v=6SWf5NTOs7I)
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/aykhan019/Battleship_Cpp/blob/master/LICENSE) file for more details.
