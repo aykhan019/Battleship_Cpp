@@ -15,34 +15,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp">
+    <ClCompile Include="src\Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Start.h">
+    <ClInclude Include="include\Start.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CursorFunctions.h">
+    <ClInclude Include="include\CursorFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PrintShipFunctions.h">
+    <ClInclude Include="include\PrintShipFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Color.h">
+    <ClInclude Include="include\Color.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Loading.h">
+    <ClInclude Include="include\Loading.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Menu.h">
+    <ClInclude Include="include\Menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StartGame.h">
+    <ClInclude Include="include\StartGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Entities.h">
+    <ClInclude Include="include\Entities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="assets\audio\Battleship-bakground-music.wav.wav">
+      <Filter>Resource Files</Filter>
+    </Content>
   </ItemGroup>
 </Project>

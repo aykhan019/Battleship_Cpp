@@ -23,22 +23,30 @@ The following types of ships are available in the game:
 ## Getting Started
 
 ### Prerequisites
-- **C++ Compiler**: You need a C++ compiler that supports C++11 or higher.
-- **Audio libraries**: To enable background music, ensure you have the necessary audio libraries (like SFML or other alternatives) installed.
+- **Windows**
+- **Visual Studio 2019 or newer** with the Desktop development with C++ workload installed.
+
+The project uses Windows console APIs such as `Windows.h`, `conio.h`, and `_setmode`, so it is intended to build with MSVC on Windows.
 
 ### Running the Project
 1. Clone the repository:
     ```bash
     git clone https://github.com/aykhan019/Battleship_Cpp.git
     ```
-2. Compile the project:
-    ```bash
-    g++ Source.cpp -o battleship -std=c++11
-    ```
-3. Run the game:
-    ```bash
-    ./battleship
-    ```
+2. Open `Battleship_(C++).sln` in Visual Studio.
+3. Select `Debug` or `Release`, then build and run the project.
+
+### Project Structure
+```text
+.
+|-- assets/
+|   `-- audio/        # Audio assets copied to the build output by Visual Studio
+|-- include/          # Project headers
+|-- src/              # C++ source entry point
+|-- Battleship_(C++).sln
+`-- Battleship_(C++).vcxproj
+```
+
 ## Controls
 - Enter coordinates in the format (e.g., A5) to make your guesses.
 
